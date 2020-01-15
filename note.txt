@@ -1,0 +1,10 @@
+-s -lsfml-graphics-s -lsfml-window-s -lsfml-system-s $(DEPENDENCY) -DSFML_STATIC
+
+
+-s static
+-d debug
+
+-DSFML_STATIC -static-libgcc -static-libstdc++ -lmingw32 -lsfml-graphics-s -lsfml-window-s -lsfml-audio-s -lsfml-system-s -lopengl32 -lfreetype -ljpeg -lwinmm -lgdi32 -lopenal32 -lFLAC -lvorbisenc -lvorbisfile -lvorbis -logg
+https://en.sfml-dev.org/forums/index.php?topic=22610.0
+
+https://en.sfml-dev.org/forums/index.php?topic=25977.msg169510#msg169510
