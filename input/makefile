@@ -18,6 +18,13 @@ ifeq ($(LIBS), $(S_LIB))
 	DEFINE=-DSFML_STATIC
 endif
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux) # Linux
+endif
+ifeq ($(UNAME_S),Darwin) # macOS
+	LIBS=$(D_LIB)
+endif
+
 EXE=input_example
 SOURCES=main.cpp key.cpp
 

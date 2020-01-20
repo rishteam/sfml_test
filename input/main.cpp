@@ -9,12 +9,84 @@
 #define WINDOW_W 1280
 #define WINDOW_H 720
 
+sf::Font g_font;
+
+class KeyButton
+{
+public:
+    enum TexType
+    {
+        Float,
+        Press
+    };
+    static sf::Texture tex[2];
+    static bool init;
+    static void loadKeyTexture()
+    {
+        if(init) return;
+        init = true;
+        tex[Float].loadFromFile("assets/key_float.png");
+        tex[Press].loadFromFile("assets/key_press.png");
+    }
+    //
+    float m_x, m_y;
+    sf::Keyboard::Key m_key;
+
+    KeyButton(float x, float y, sf::Keyboard::Key key) : m_x(x), m_y(y), m_key(key)
+    {
+        loadKeyTexture();
+        sprite.setPosition(x, y);
+        sprite.setScale({0.5, 0.5});
+
+        text.setString(toString(key));
+        text.setFont(g_font);
+        text.setCharacterSize(40);
+        text.setPosition({m_x + 55, m_y + 35});
+        text.setFillColor(sf::Color(0, 0, 0));
+    }
+
+    void setPos(float x, float y)
+    {
+        m_x = x;
+        m_y = y;
+    }
+
+    void update()
+    {
+        if(sf::Keyboard::isKeyPressed(m_key))
+            sprite.setTexture(KeyButton::tex[KeyButton::Float]);
+        else
+            sprite.setTexture(KeyButton::tex[KeyButton::Press]);
+    }
+    void draw(sf::RenderTarget &rt)
+    {
+        rt.draw(sprite);
+        rt.draw(text);
+    }
+private:
+    sf::Sprite sprite;
+    sf::Text text;
+};
+
+bool KeyButton::init = false;
+sf::Texture KeyButton::tex[2];
+
 int main()
 {
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "SFML window");
     // window.setFramerateLimit(60);
     sf::Clock clock;
+
+    g_font.loadFromFile("arial.ttf"); // load font
+
+    // Create WASD key
+    float kx = 100, ky = 100;
+    std::vector<KeyButton> keys = {
+        KeyButton(kx + 139, ky + 0, sf::Keyboard::W),
+        KeyButton(kx + 0, ky + 146, sf::Keyboard::A),
+        KeyButton(kx + 139, ky + 146, sf::Keyboard::S),
+        KeyButton(kx + 278, ky + 146, sf::Keyboard::D)};
 
     // init
     clock.restart();
@@ -25,7 +97,6 @@ int main()
             sf::sleep(sf::milliseconds(5));
         clock.restart();
         // Process events
-        sf::String s;
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -112,13 +183,19 @@ int main()
 
             default:
                 if(event.type != sf::Event::MouseWheelMoved)
-                printf("UNHANDLED EVENT HAPPENED\n");
+                    printf("UNHANDLED EVENT HAPPENED\n");
             break;
             }
         }
+
+        // Real-time input
+        for(auto & key: keys)
+            key.update();
+
         /* Render */
         window.clear();
-
+        for (auto &key : keys)
+            key.draw(window);
         window.display();
     }
 }
