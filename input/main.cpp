@@ -75,18 +75,23 @@ int main()
 {
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "SFML window");
-    // window.setFramerateLimit(60);
+    window.setFramerateLimit(60);
     sf::Clock clock;
 
     g_font.loadFromFile("arial.ttf"); // load font
 
     // Create WASD key
-    float kx = 100, ky = 100;
+    float kx = 100, ky = 350;
     std::vector<KeyButton> keys = {
         KeyButton(kx + 139, ky + 0, sf::Keyboard::W),
         KeyButton(kx + 0, ky + 146, sf::Keyboard::A),
         KeyButton(kx + 139, ky + 146, sf::Keyboard::S),
         KeyButton(kx + 278, ky + 146, sf::Keyboard::D)};
+
+    sf::Texture t;
+    t.loadFromFile("assets/m.png");
+    sf::Sprite mouseCap;
+    mouseCap.setTexture(t);
 
     // init
     clock.restart();
@@ -94,7 +99,7 @@ int main()
     while (window.isOpen())
     {
         while(clock.getElapsedTime().asSeconds() < 1/60.f)
-            sf::sleep(sf::milliseconds(5));
+            sf::sleep(sf::milliseconds(1));
         clock.restart();
         // Process events
         sf::Event event;
@@ -192,10 +197,32 @@ int main()
         for(auto & key: keys)
             key.update();
 
+        // Update mouseCap
+        sf::Vector2i pos = sf::Mouse::getPosition(window);
+        mouseCap.setPosition(pos.x - 93, pos.y - 196);
+
         /* Render */
         window.clear();
+
         for (auto &key : keys)
             key.draw(window);
+        window.draw(mouseCap);
+
+        // Prepare the info text
+        char tmp[100];
+        sf::String s = "real-time mouse pos\n";
+        sprintf(tmp, "x=%d y=%d\n", pos.x, pos.y);
+        s += tmp;
+        sprintf(tmp, "%s %s %s", 
+            sf::Mouse::isButtonPressed(sf::Mouse::Left) ? "L" : "",
+            sf::Mouse::isButtonPressed(sf::Mouse::Middle) ? "M" : "",
+            sf::Mouse::isButtonPressed(sf::Mouse::Right) ? "R" : ""
+        );
+        s += tmp;
+        sf::Text info(s, g_font);
+
+        window.draw(info);
+
         window.display();
     }
 }
