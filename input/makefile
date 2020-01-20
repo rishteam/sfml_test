@@ -12,7 +12,7 @@ D_LIB=-lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system
 S_LIB=-DSFML_STATIC -static -lsfml-graphics-s -lsfml-window-s -lsfml-audio-s -lsfml-system-s
 S_LIB+=-lopengl32 -lfreetype -lwinmm -lgdi32
 S_LIB+=-lopenal32 -lvorbisenc -lvorbisfile -lvorbis -lFLAC -lm -logg
-LIBS=$(D_LIB)
+LIBS=$(S_LIB)
 
 ifeq ($(LIBS), $(S_LIB))
 	DEFINE=-DSFML_STATIC
