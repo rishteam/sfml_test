@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <functional>
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -71,6 +72,56 @@ private:
 bool KeyButton::init = false;
 sf::Texture KeyButton::tex[2];
 
+class Button
+{
+public:
+    Button(float x, float y, float w, float h)
+    {
+        m_x = x;
+        m_y = y;
+        m_w = w;
+        m_h = h;
+
+        rectShape.setPosition({x, y});
+        rectShape.setSize({w, h});
+
+        text.setString("Clear");
+        text.setFont(g_font);
+        text.setPosition(m_x+5, m_y+5);
+    }
+    void update(sf::RenderWindow &window, std::function<void()> callback)
+    {
+        auto pos = sf::Mouse::getPosition(window);
+        float lx = m_x, ly = m_y, rx = m_x+m_w, ry = m_y+m_h;
+        if(lx <= pos.x && pos.x <= rx && ly <= pos.y && pos.y <= ry)
+        {
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            {
+                callback();
+                rectShape.setFillColor(sf::Color(128, 128, 128));
+            }
+            else
+                rectShape.setFillColor(sf::Color(160, 160, 160));
+            //
+            text.setFillColor(sf::Color(255, 255, 255));
+        }
+        else
+        {
+            rectShape.setFillColor(sf::Color(255, 255, 255));
+            text.setFillColor(sf::Color(0, 0, 0));
+        }
+    }
+    void draw(sf::RenderWindow &window)
+    {
+        window.draw(rectShape);
+        window.draw(text);
+    }
+private:
+    float m_x, m_y, m_w, m_h; // pos, width, height
+    sf::RectangleShape rectShape;
+    sf::Text text;
+};
+
 int main()
 {
     // Create the main window
@@ -92,6 +143,10 @@ int main()
     t.loadFromFile("assets/m.png");
     sf::Sprite mouseCap;
     mouseCap.setTexture(t);
+
+    sf::String input_string;
+
+    Button clearBtn(0, 200, 100, 50);
 
     // init
     clock.restart();
@@ -144,8 +199,7 @@ int main()
 
             case sf::Event::TextEntered:
             {
-                // s += event.text.unicode;
-                // std::wcout << s.toWideString() << '\n';
+                input_string += event.text.unicode;
             }
             break;
             // Mouse events
@@ -201,6 +255,10 @@ int main()
         sf::Vector2i pos = sf::Mouse::getPosition(window);
         mouseCap.setPosition(pos.x - 93, pos.y - 196);
 
+        clearBtn.update(window, [&input_string]() {
+            input_string = "";
+        });
+
         /* Render */
         window.clear();
 
@@ -208,12 +266,14 @@ int main()
             key.draw(window);
         window.draw(mouseCap);
 
+        clearBtn.draw(window);
+
         // Prepare the info text
         char tmp[100];
         sf::String s = "real-time mouse pos\n";
         sprintf(tmp, "x=%d y=%d\n", pos.x, pos.y);
         s += tmp;
-        sprintf(tmp, "%s %s %s", 
+        sprintf(tmp, "%s %s %s",
             sf::Mouse::isButtonPressed(sf::Mouse::Left) ? "L" : "",
             sf::Mouse::isButtonPressed(sf::Mouse::Middle) ? "M" : "",
             sf::Mouse::isButtonPressed(sf::Mouse::Right) ? "R" : ""
@@ -221,6 +281,10 @@ int main()
         s += tmp;
         sf::Text info(s, g_font);
 
+        sf::Text text(input_string, g_font);
+        text.setPosition(0, 300);
+
+        window.draw(text);
         window.draw(info);
 
         window.display();
